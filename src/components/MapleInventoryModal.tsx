@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Coins, Info } from 'lucide-react';
 import { MapleItem } from '../data/mapleItems';
 import { MapleLeafIcon } from './MapleIcons';
 import { bgmPlayer } from '../utils/audioSynth';
@@ -19,77 +18,29 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
   selectedItem,
   onSelectItem,
 }) => {
-  const [activeTab, setActiveTab] = useState<'Equip' | 'Use' | 'Etc' | 'Setup'>('Equip');
   const [hoveredItem, setHoveredItem] = useState<MapleItem | null>(null);
 
   if (!isOpen) return null;
 
-  const tabs: Array<'Equip' | 'Use' | 'Etc' | 'Setup'> = ['Equip', 'Use', 'Etc', 'Setup'];
+  const totalSlots = 12;
+  const slots = Array.from({ length: totalSlots }, (_, idx) => inventory[idx] || null);
 
-  const filteredItems = inventory.filter((item) => item.type === activeTab);
-  // Total 24 slots (4 cols x 6 rows) like classic MapleStory
-  const totalSlots = 24;
-  const slots = Array.from({ length: totalSlots }).map((_, idx) => filteredItems[idx] || null);
-
-  const activeTooltipItem = hoveredItem || selectedItem;
+  // Details are transient: hovering a loot slot is the only way to show them.
+  const activeTooltipItem = hoveredItem;
 
   const renderItemGraphic = (icon: string, color: string) => {
-    switch (icon) {
-      case 'scroll-gold':
-        return (
-          <div className="w-8 h-8 rounded bg-amber-100 border border-amber-400 flex items-center justify-center text-amber-800 font-serif font-bold text-xs shadow-inner">
-            📜
-          </div>
-        );
-      case 'cap-emerald':
-        return (
-          <div className="w-8 h-8 rounded bg-emerald-100 border border-emerald-400 flex items-center justify-center text-emerald-800 text-sm shadow-inner">
-            🍄
-          </div>
-        );
-      case 'book-blue':
-        return (
-          <div className="w-8 h-8 rounded bg-sky-100 border border-sky-400 flex items-center justify-center text-sky-800 text-sm shadow-inner">
-            📘
-          </div>
-        );
-      case 'medal-maple':
-        return (
-          <div className="w-8 h-8 rounded bg-orange-100 border border-orange-400 flex items-center justify-center text-orange-700 text-sm shadow-inner">
-            🍁
-          </div>
-        );
-      case 'orb-purple':
-        return (
-          <div className="w-8 h-8 rounded bg-purple-100 border border-purple-400 flex items-center justify-center text-purple-700 text-sm shadow-inner">
-            🔮
-          </div>
-        );
-      case 'chip-cyan':
-        return (
-          <div className="w-8 h-8 rounded bg-cyan-100 border border-cyan-400 flex items-center justify-center text-cyan-800 text-sm shadow-inner">
-            💾
-          </div>
-        );
-      case 'potion-red':
-        return (
-          <div className="w-8 h-8 rounded bg-red-100 border border-red-400 flex items-center justify-center text-red-700 text-sm shadow-inner">
-            🧪
-          </div>
-        );
-      case 'diploma-blue':
-        return (
-          <div className="w-8 h-8 rounded bg-blue-100 border border-blue-400 flex items-center justify-center text-blue-900 text-sm shadow-inner">
-            🎓
-          </div>
-        );
-      default:
-        return (
-          <div className="w-8 h-8 rounded bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700 text-sm">
-            ⭐
-          </div>
-        );
-    }
+    const iconFile: Record<string, string> = {
+      'scroll-gold': 'scroll.png', 'cap-emerald': 'leaf.png',
+      'book-blue': 'book.png', 'medal-maple': 'maple.png',
+      'orb-purple': 'salon.png', 'chip-cyan': 'screw.png',
+      'potion-red': 'chair.png', 'diploma-blue': 'scroll.png',
+    };
+    const file = icon.endsWith('.png') ? icon : (iconFile[icon] ?? 'leaf.png');
+    return (
+      <div className="w-8 h-8 flex items-center justify-center">
+        <img src={`/items/${file}`} alt="" className="w-7 h-7 object-contain" />
+      </div>
+    );
   };
 
   return (
@@ -98,7 +49,7 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col md:flex-row items-start gap-4 max-w-4xl w-full justify-center"
+        className="relative w-[340px] max-w-full max-h-[90dvh] overflow-visible"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Main Classic MapleStory Inventory Window */}
@@ -115,63 +66,34 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
                 onClose();
               }}
               className="w-4 h-4 bg-red-600 hover:bg-red-500 text-white rounded flex items-center justify-center text-xs font-bold leading-none cursor-pointer"
-              title="Close (I or Esc)"
+              title="Close inventory (I)" aria-label="Close inventory"
             >
               ×
             </button>
           </div>
 
-          {/* Navigation Tabs (Equip, Use, Etc, Setup) */}
-          <div className="grid grid-cols-4 bg-[#c8beab] p-1 gap-1 border-b border-[#a89b87]">
-            {tabs.map((tab) => {
-              const count = inventory.filter((item) => item.type === tab).length;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    bgmPlayer.playInventoryToggle();
-                    setActiveTab(tab);
-                  }}
-                  className={`py-1 text-center text-xs font-mono font-bold rounded cursor-pointer transition-colors relative ${
-                    activeTab === tab
-                      ? 'bg-[#f4efe4] text-[#2c4060] shadow-xs border border-[#8a7a63]'
-                      : 'bg-[#b6aa95] hover:bg-[#c2b6a1] text-stone-700'
-                  }`}
-                >
-                  <span>{tab}</span>
-                  {count > 0 && (
-                    <span className="ml-1 text-[10px] px-1 py-0.2 rounded-full bg-amber-500 text-white font-mono">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          <div className="bg-[#c8beab] p-1 border-b border-[#a89b87]">
+            <div className="py-1.5 text-center text-xs font-mono font-bold rounded bg-[#f4efe4] text-[#2c4060] border border-[#8a7a63]">
+              {inventory.length}/12 items collected
+            </div>
           </div>
 
-          {/* Slots Area (4 cols x 6 rows) */}
+          {/* All collected loot */}
           <div className="p-3 bg-[#ece4d6]">
-            <div className="text-[11px] font-mono text-stone-600 mb-1.5 flex justify-between items-center">
-              <span>{activeTab} Inventory ({filteredItems.length} items collected)</span>
-              <span className="text-amber-800 font-bold">Hover item for lore</span>
-            </div>
+            <p className="text-[11px] text-stone-600 mb-2">Hover over loot to inspect its resume details.</p>
 
             <div className="grid grid-cols-4 gap-1.5 p-2 bg-[#dfd4c2] rounded-lg border border-[#a89982] shadow-inner">
               {slots.map((item, idx) => (
                 <div
                   key={idx}
                   onMouseEnter={() => setHoveredItem(item)}
-                  onClick={() => {
-                    if (item) {
-                      bgmPlayer.playInventoryToggle();
-                      onSelectItem(item);
-                    }
-                  }}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  onClick={() => item && bgmPlayer.playInventoryToggle()}
                   className={`w-14 h-14 rounded-md border-2 flex items-center justify-center relative cursor-pointer transition-all ${
                     item
                       ? 'bg-white hover:bg-amber-50 border-[#8d7c65] shadow-xs hover:border-amber-600'
                       : 'bg-[#cfc3af]/50 border-dashed border-[#b3a58e]/60'
-                  } ${selectedItem?.id === item?.id && item ? 'ring-2 ring-amber-500 bg-amber-100/50' : ''}`}
+                  }`}
                 >
                   {item ? (
                     <>
@@ -187,17 +109,6 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
               ))}
             </div>
 
-            {/* Bottom Bar: Mesos Counter (Showing $40,000 annual savings at RBC!) */}
-            <div className="mt-3 p-2 bg-[#f4efe4] rounded-lg border border-[#b3a58e] flex items-center justify-between text-xs font-mono">
-              <div className="flex items-center gap-1.5 text-stone-700 font-bold">
-                <Coins className="w-3.5 h-3.5 text-amber-500" />
-                <span>Mesos Saved:</span>
-              </div>
-              <div className="text-amber-700 font-extrabold flex items-center gap-1">
-                <span>40,000</span>
-                <span className="text-[10px] text-stone-500">Meso ($USD saved/yr)</span>
-              </div>
-            </div>
           </div>
 
           {/* Quick Help Footer */}
@@ -208,8 +119,11 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
         </div>
 
         {/* Authentic MapleStory Item Tooltip (shows when hovering or selecting an item) */}
-        {activeTooltipItem ? (
-          <div className="w-full max-w-[340px] bg-[#0c1527]/95 border-2 border-amber-400 rounded-xl p-4 shadow-2xl text-white font-sans space-y-3 animate-in fade-in duration-150 backdrop-blur-md">
+        <div
+          className={`inventory-tooltip absolute left-[calc(100%+16px)] top-0 w-[340px] max-w-[calc(100vw-32px)] bg-[#0c1527]/95 border-2 border-amber-400 rounded-xl p-4 shadow-2xl text-white font-sans space-y-3 backdrop-blur-md transition-opacity duration-150 ${activeTooltipItem ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          aria-hidden={!activeTooltipItem}
+        >
+          {activeTooltipItem && <>
             {/* Title & Icon Header */}
             <div className="flex items-start gap-3 pb-3 border-b border-amber-400/40">
               <div className="p-1 rounded-lg bg-black/50 border border-amber-400/60 shrink-0">
@@ -220,35 +134,13 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
                 <h4 className="text-sm font-bold text-amber-300 leading-tight">
                   {activeTooltipItem.name}
                 </h4>
-                <div className="text-[11px] font-mono text-stone-300">
-                  {activeTooltipItem.categoryName}
-                </div>
-                <div className="inline-block px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  {activeTooltipItem.rarity}
-                </div>
-              </div>
-            </div>
-
-            {/* Requirement Matrix */}
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/30 p-2 rounded-lg border border-white/10">
-              <div>
-                <span className="text-stone-400">REQ LEV : </span>
-                <span className="text-amber-300 font-bold">{activeTooltipItem.reqLevel}</span>
-              </div>
-              <div>
-                <span className="text-stone-400">REQ JOB : </span>
-                <span className="text-emerald-400 font-bold">Engineer</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-stone-400">QUALIFICATION : </span>
-                <span className="text-sky-300">{activeTooltipItem.reqJob}</span>
               </div>
             </div>
 
             {/* In-Game / Real Resume Stats */}
             <div className="space-y-1.5 text-xs font-mono bg-amber-950/30 p-2.5 rounded-lg border border-amber-500/20">
               <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
-                ITEM STAT ATTRIBUTES:
+                HIGHLIGHTS
               </div>
               {Object.entries(activeTooltipItem.stats).map(([k, v]) => (
                 <div key={k} className="flex justify-between items-center text-[11px] border-b border-white/5 pb-0.5">
@@ -258,30 +150,22 @@ export const MapleInventoryModal: React.FC<MapleInventoryModalProps> = ({
               ))}
             </div>
 
+            <p className="text-xs leading-relaxed text-stone-300 bg-black/30 rounded border border-white/10 p-2">
+              {activeTooltipItem.description}
+            </p>
+
             {/* Real World Impact Description */}
             <div className="text-xs space-y-1 text-stone-200 leading-relaxed font-sans">
               <div className="font-bold text-amber-300 text-[11px] font-mono">
-                ENGINEERING REAL-WORLD RECORD:
+                REAL-WORLD IMPACT
               </div>
               <p className="text-xs bg-black/40 p-2 rounded border border-white/10 text-stone-300">
                 {activeTooltipItem.realWorldImpact}
               </p>
             </div>
 
-            {/* Flavor Lore */}
-            <div className="pt-1 text-[11px] italic text-amber-200/80 font-sans border-t border-amber-400/20">
-              "{activeTooltipItem.flavorText}"
-            </div>
-          </div>
-        ) : (
-          <div className="w-full max-w-[340px] bg-[#0c1527]/90 border-2 border-stone-600 rounded-xl p-5 shadow-2xl text-stone-400 font-sans space-y-2 text-center backdrop-blur-md">
-            <Info className="w-8 h-8 text-amber-400 mx-auto opacity-70" />
-            <h4 className="text-xs font-mono font-bold text-stone-200">No Item Selected</h4>
-            <p className="text-xs text-stone-400 leading-relaxed">
-              Hover over any collected item slot in your inventory, or attack monsters on the map to discover more resume drops!
-            </p>
-          </div>
-        )}
+          </>}
+        </div>
       </div>
     </div>
   );

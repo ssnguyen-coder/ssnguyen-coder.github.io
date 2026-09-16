@@ -1,0 +1,81 @@
+{
+  "jumo_left": {
+    "pose": "jump",
+    "scale": 2,
+    "count": 1,
+    "delays_ms": [
+      200
+    ]
+  },
+  "jump_right": {
+    "pose": "jump",
+    "scale": 2,
+    "count": 1,
+    "delays_ms": [
+      200
+    ]
+  },
+  "ladder_movement": {
+    "pose": "ladder",
+    "scale": 2,
+    "count": 2,
+    "delays_ms": [
+      250,
+      250
+    ]
+  },
+  "shoot_left": {
+    "pose": "shoot1",
+    "scale": 2,
+    "count": 3,
+    "delays_ms": [
+      300,
+      150,
+      350
+    ]
+  },
+  "stand_left": {
+    "pose": "stand1",
+    "scale": 2,
+    "count": 4,
+    "delays_ms": [
+      500,
+      500,
+      500,
+      500
+    ]
+  },
+  "stand_right": {
+    "pose": "stand1",
+    "scale": 2,
+    "count": 4,
+    "delays_ms": [
+      500,
+      500,
+      500,
+      500
+    ]
+  },
+  "walk_left": {
+    "pose": "walk1",
+    "scale": 2,
+    "count": 4,
+    "delays_ms": [
+      180,
+      180,
+      180,
+      180
+    ]
+  },
+  "walk_right": {
+    "pose": "walk1",
+    "scale": 2,
+    "count": 4,
+    "delays_ms": [
+      180,
+      180,
+      180,
+      180
+    ]
+  }
+}

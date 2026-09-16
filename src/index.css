@@ -78,3 +78,93 @@
 .animate-gentle-bob {
   animation: gentleBob 3.5s ease-in-out infinite;
 }
+
+/* Shared game HUD: the scene runs behind both floating parchment panels. */
+.maple-screen { background: #3266cb; }
+.maple-header {
+  position: absolute;
+  inset: 14px 18px auto;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.maple-panel {
+  color: #5b4029;
+  background: linear-gradient(180deg, #fff5dcf5, #e9d3aef5);
+  border: 2px solid #775636;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px #fff8e3, inset 0 -5px 0 #ba925c40,
+    0 3px 0 #473624b3, 0 6px 16px #182c3740;
+  pointer-events: auto;
+}
+.maple-identity { display: flex; align-items: center; gap: 10px; padding: 9px 15px 10px 10px; }
+.maple-emblem {
+  display: grid; place-items: center; width: 38px; height: 38px;
+  color: #cb611e; background: #f9e4ae;
+  border: 1px solid #b48c49; border-radius: 50%; box-shadow: inset 0 0 0 3px #fff3d0;
+}
+.maple-location { font: 700 9px/1.5 monospace; letter-spacing: 1.4px; color: #97774b; }
+.maple-name { font-size: 15px; font-weight: 800; color: #663f22; text-shadow: 0 1px #fff9e6; }
+.maple-name span { font-size: 11px; font-weight: 500; margin-left: 4px; }
+.maple-menu { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; padding: 8px; }
+.maple-hud-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  min-height: 32px; padding: 5px 9px;
+  color: #75502d; font-size: 11px; font-weight: 700; white-space: nowrap;
+  background: linear-gradient(#fffbed, #eed9af);
+  border: 1px solid #b79560; border-bottom-width: 3px; border-radius: 6px;
+  box-shadow: inset 0 1px #fff; cursor: pointer;
+  transition: background 120ms, transform 120ms;
+}
+.maple-hud-button:hover { background: linear-gradient(#fffdf5, #ffe3a6); }
+.maple-hud-button:active { transform: translateY(1px); }
+.maple-hud-button:focus-visible { outline: 3px solid #46746b; outline-offset: 3px; }
+.maple-hud-button.is-enabled { background: linear-gradient(#e9f2ca, #c4d398); border-color: #839153; color: #52652d; }
+.maple-hud-primary { background: linear-gradient(#fcb95f, #e98a35); border-color: #aa602e; color: #623312; }
+.maple-hud-primary:hover { background: linear-gradient(#ffcf80, #f69e49); }
+.maple-footer {
+  position: absolute; z-index: 40; bottom: max(12px, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  width: max-content; max-width: min(calc(100% - 36px), 1180px); padding: 8px;
+}
+.maple-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
+.maple-key-button { min-height: 32px; padding-inline: 9px; }
+.maple-control-hint { width: auto; text-align: center; font-size: 10px; color: #826443; padding: 0 2px; }
+@media (max-width: 760px) {
+  .maple-header { inset: 8px 8px auto; gap: 6px; flex-wrap: wrap; }
+  .maple-identity { padding: 6px 10px; }
+  .maple-name { font-size: 13px; }
+  .maple-name span { font-size: 10px; }
+  .maple-location { font-size: 8px; }
+  .maple-menu { padding: 5px; gap: 4px; }
+  .maple-footer { max-width: calc(100% - 16px); width: max-content; padding: 5px; bottom: 8px; }
+  .maple-key-button { padding-inline: 7px; }
+  .maple-controls { gap: 4px; }
+}
+@media (max-height: 500px) {
+  .maple-identity { padding-block: 4px; }
+  .maple-location, .maple-control-hint { display: none; }
+  .maple-footer { padding: 5px 8px; bottom: 5px; }
+}
+.maple-key-button kbd {
+  padding: 1px 5px; border: 1px solid #b79560; border-bottom-width: 2px;
+  border-radius: 4px; background: #fff9e4; color: #66472a;
+  font: 700 10px/1.5 monospace;
+}
+.maple-tutorial-bubble {
+  position: absolute; left: 0; top: -74px; transform: translateX(-50%);
+  width: 190px; color: #ffc477; font-size: 8px; font-weight: 700;
+  line-height: 1.35; text-align: center; text-shadow: 1px 1px 2px #493827, 0 0 4px #493827;
+  transition: opacity 900ms ease, transform 900ms ease;
+}
+.maple-tutorial-bubble.is-visible { opacity: 1; }
+.maple-tutorial-bubble.is-hidden { opacity: 0; transform: translateX(-50%) translateY(-8px); pointer-events: none; }
+.inventory-tooltip { z-index: 2; }
+@media (max-width: 720px) {
+  .inventory-tooltip {
+    left: 50%; top: calc(100% + 12px); transform: translateX(-50%);
+  }
+}

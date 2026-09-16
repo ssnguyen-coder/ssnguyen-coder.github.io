@@ -1,0 +1,8 @@
+{
+  "pose": "jump",
+  "scale": 2,
+  "count": 1,
+  "delays_ms": [
+    200
+  ]
+}

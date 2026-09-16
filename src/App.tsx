@@ -33,14 +33,11 @@ export default function App() {
 
       {/* FULL-SCREEN MAPLESTORY MAP APP: Header at top of map, 2D interactive canvas in center, Footer HUD at bottom of map */}
       <MapleGameStage
-        onOpenInventory={() => setInventoryOpen(true)}
+        onOpenInventory={() => setInventoryOpen(open => !open)}
         onOpenResume={() => setResumeModalOpen(true)}
         inventory={inventory}
         onAddItem={handleAddItem}
-        onSelectItemForModal={(item) => {
-          setSelectedInventoryItem(item);
-          setInventoryOpen(true);
-        }}
+        paused={inventoryOpen || resumeModalOpen}
       />
 
       {/* Printable / Viewable Resume Modal (Exact real resume from PDF) */}

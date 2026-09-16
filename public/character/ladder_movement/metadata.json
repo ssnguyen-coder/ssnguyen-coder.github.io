@@ -1,0 +1,9 @@
+{
+  "pose": "ladder",
+  "scale": 2,
+  "count": 2,
+  "delays_ms": [
+    250,
+    250
+  ]
+}

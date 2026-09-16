@@ -1,12 +1,9 @@
-// Web Audio API MapleStory-inspired Relaxing Cozy Chiptune/Lofi Synth & Game SFX
-// Zero external audio assets required. High reliability and instant response.
-
+// Looping extracted background music plus synthesized game sound effects.
 class CozyBgmPlayer {
   private ctx: AudioContext | null = null;
-  private isPlaying = false;
-  private timerId: number | null = null;
-  private masterGain: GainNode | null = null;
-  private noteIndex = 0;
+  // This is the user's enabled preference, even while autoplay is blocked.
+  private isPlaying = true;
+  private music: HTMLAudioElement | null = null;
   private onStateChangeCb: ((playing: boolean) => void) | null = null;
 
   private getAudioContext(): AudioContext | null {
@@ -22,170 +19,58 @@ class CozyBgmPlayer {
     return this.ctx;
   }
 
-  // Soothing, nostalgic chord arpeggios reminiscent of Henesys / Lith Harbor peaceful afternoon
-  private readonly melodyNotes = [
-    // Bar 1 - C major 7 warm morning
-    { note: 261.63, dur: 0.4 }, // C4
-    { note: 329.63, dur: 0.4 }, // E4
-    { note: 392.00, dur: 0.4 }, // G4
-    { note: 493.88, dur: 0.7 }, // B4
-    { note: 523.25, dur: 0.4 }, // C5
-    { note: 392.00, dur: 0.5 }, // G4
-
-    // Bar 2 - A minor 7 cozy shade
-    { note: 220.00, dur: 0.4 }, // A3
-    { note: 329.63, dur: 0.4 }, // E4
-    { note: 392.00, dur: 0.4 }, // G4
-    { note: 440.00, dur: 0.6 }, // A4
-    { note: 523.25, dur: 0.4 }, // C5
-    { note: 440.00, dur: 0.5 }, // A4
-
-    // Bar 3 - F major 7 green pasture
-    { note: 174.61, dur: 0.4 }, // F3
-    { note: 261.63, dur: 0.4 }, // C4
-    { note: 329.63, dur: 0.4 }, // E4
-    { note: 349.23, dur: 0.6 }, // F4
-    { note: 392.00, dur: 0.4 }, // G4
-    { note: 329.63, dur: 0.5 }, // E4
-
-    // Bar 4 - G suspended warm sunset
-    { note: 196.00, dur: 0.4 }, // G3
-    { note: 293.66, dur: 0.4 }, // D4
-    { note: 392.00, dur: 0.4 }, // G4
-    { note: 440.00, dur: 0.4 }, // A4
-    { note: 493.88, dur: 0.6 }, // B4
-    { note: 392.00, dur: 0.6 }, // G4
-
-    // Bar 5 - E minor 7 floating leaf
-    { note: 164.81, dur: 0.4 }, // E3
-    { note: 246.94, dur: 0.4 }, // B3
-    { note: 329.63, dur: 0.4 }, // E4
-    { note: 392.00, dur: 0.6 }, // G4
-    { note: 493.88, dur: 0.4 }, // B4
-    { note: 392.00, dur: 0.5 }, // G4
-
-    // Bar 6 - D minor 9 gentle stream
-    { note: 146.83, dur: 0.4 }, // D3
-    { note: 220.00, dur: 0.4 }, // A3
-    { note: 261.63, dur: 0.4 }, // C4
-    { note: 329.63, dur: 0.6 }, // E4
-    { note: 349.23, dur: 0.4 }, // F4
-    { note: 261.63, dur: 0.5 }, // C4
-
-    // Bar 7 - G dominant campfire spark
-    { note: 196.00, dur: 0.4 }, // G3
-    { note: 293.66, dur: 0.4 }, // D4
-    { note: 349.23, dur: 0.4 }, // F4
-    { note: 392.00, dur: 0.5 }, // G4
-    { note: 523.25, dur: 0.5 }, // C5
-    { note: 493.88, dur: 0.6 }, // B4
-
-    // Bar 8 - C major resolved smile
-    { note: 261.63, dur: 0.5 }, // C4
-    { note: 329.63, dur: 0.5 }, // E4
-    { note: 392.00, dur: 0.5 }, // G4
-    { note: 523.25, dur: 1.0 }, // C5
-    { note: 0, dur: 0.5 },      // Rest
-  ];
-
   public subscribe(cb: (playing: boolean) => void) {
     this.onStateChangeCb = cb;
+    cb(this.isPlaying);
+    return () => { if (this.onStateChangeCb === cb) this.onStateChangeCb = null; };
   }
 
-  public getIsPlaying(): boolean {
-    return this.isPlaying;
+  public getIsPlaying(): boolean { return this.isPlaying; }
+
+  private tryPlayback = () => {
+    if (!this.isPlaying) return;
+    if (!this.music) {
+      this.music = new Audio('/background.mp3');
+      this.music.loop = true;
+      this.music.volume = 0.35;
+      this.music.preload = 'auto';
+    }
+    if (!this.music.paused) return;
+    void this.music.play().then(() => {
+      if (!this.isPlaying) this.music?.pause();
+    }).catch(() => {
+      // Autoplay may be blocked; retry on the next user gesture without
+      // changing the enabled preference or producing an unhandled rejection.
+    });
+  };
+
+  public initialize() {
+    this.tryPlayback();
+    window.addEventListener('pointerdown', this.tryPlayback);
+    window.addEventListener('keydown', this.tryPlayback);
+    return () => {
+      window.removeEventListener('pointerdown', this.tryPlayback);
+      window.removeEventListener('keydown', this.tryPlayback);
+      this.music?.pause();
+    };
   }
 
   public toggle(): boolean {
-    if (this.isPlaying) {
-      this.stop();
-      return false;
-    } else {
-      this.start();
-      return true;
-    }
+    if (this.isPlaying) this.stop();
+    else this.start();
+    return this.isPlaying;
   }
 
   public start() {
-    try {
-      const ctx = this.getAudioContext();
-      if (!ctx) return;
-
-      this.masterGain = ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.08, ctx.currentTime);
-      this.masterGain.connect(ctx.destination);
-
-      this.isPlaying = true;
-      this.noteIndex = 0;
-      if (this.onStateChangeCb) this.onStateChangeCb(true);
-
-      this.scheduleNextNote();
-    } catch {
-      this.isPlaying = false;
-      if (this.onStateChangeCb) this.onStateChangeCb(false);
-    }
-  }
-
-  private scheduleNextNote = () => {
-    if (!this.isPlaying || !this.ctx || !this.masterGain) return;
-
-    const current = this.melodyNotes[this.noteIndex];
-    if (current.note > 0) {
-      this.playPluck(current.note, current.dur);
-    }
-
-    this.noteIndex = (this.noteIndex + 1) % this.melodyNotes.length;
-    const stepDurationMs = Math.max(280, current.dur * 850);
-    this.timerId = window.setTimeout(this.scheduleNextNote, stepDurationMs);
-  };
-
-  private playPluck(freq: number, dur: number) {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, now);
-
-    const sub = this.ctx.createOscillator();
-    sub.type = 'sine';
-    sub.frequency.setValueAtTime(freq * 0.5, now);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1400, now);
-    filter.frequency.exponentialRampToValueAtTime(450, now + dur);
-
-    const noteGain = this.ctx.createGain();
-    noteGain.gain.setValueAtTime(0.001, now);
-    noteGain.gain.linearRampToValueAtTime(0.7, now + 0.04);
-    noteGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
-
-    osc.connect(filter);
-    sub.connect(filter);
-    filter.connect(noteGain);
-    noteGain.connect(this.masterGain);
-
-    osc.start(now);
-    sub.start(now);
-    osc.stop(now + dur + 0.05);
-    sub.stop(now + dur + 0.05);
+    this.isPlaying = true;
+    this.onStateChangeCb?.(true);
+    this.tryPlayback();
   }
 
   public stop() {
     this.isPlaying = false;
-    if (this.timerId !== null) {
-      window.clearTimeout(this.timerId);
-      this.timerId = null;
-    }
-    if (this.masterGain && this.ctx) {
-      try {
-        this.masterGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-      } catch {
-        // Safe fallback
-      }
-    }
-    if (this.onStateChangeCb) this.onStateChangeCb(false);
+    this.music?.pause();
+    this.onStateChangeCb?.(false);
   }
 
   // Authentic MapleStory SFX Generators

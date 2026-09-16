@@ -1,0 +1,10 @@
+{
+  "pose": "shoot1",
+  "scale": 2,
+  "count": 3,
+  "delays_ms": [
+    300,
+    150,
+    350
+  ]
+}
