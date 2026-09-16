@@ -1,13 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { characterSprite, mushroomSprite } from '../game/assets';
 import { V_WIDTH, V_HEIGHT, type Game, type Drop } from '../game/engine';
 import { MAP_IMAGE } from '../game/world';
 import { MAPLE_DROPPABLE_ITEMS } from '../data/mapleItems';
 // Crop inside the soil so the footer meets terrain rather than the blue image margin.
 const VISIBLE_MAP_HEIGHT = 438;
-const ICONS: Record<string, string> = { 'scroll-gold': 'scroll.png', 'cap-emerald': 'leaf.png',
-  'book-blue': 'book.png', 'medal-maple': 'maple.png', 'orb-purple': 'salon.png',
-  'chip-cyan': 'screw.png', 'potion-red': 'chair.png', 'diploma-blue': 'scroll.png' };
 
 export function GameWorld({ game, onAttack, onPickup, toastMessage, tutorialVisible }: {
   game: Game; onAttack: () => void; onPickup: (drop: Drop) => void; toastMessage: string | null; tutorialVisible: boolean;
@@ -26,6 +23,7 @@ export function GameWorld({ game, onAttack, onPickup, toastMessage, tutorialVisi
   // stretch characters, monsters, or item icons. World coordinates stay shared.
   const entityScale = Math.min(scale.x, scale.y);
   const entityTransform = `scale(${entityScale / scale.x}, ${entityScale / scale.y})`;
+  const hitSize = Math.max(34, 44 / entityScale);
   const p = game.player;
   const sprite = characterSprite(p.action, p.facing, p.elapsed);
   return <main ref={container} className="flex-1 min-h-0 relative overflow-hidden bg-[#3266cb]" aria-label="Henesys Hunting Ground game">
@@ -35,7 +33,7 @@ export function GameWorld({ game, onAttack, onPickup, toastMessage, tutorialVisi
       <img src={MAP_IMAGE} alt="Henesys platforms, ropes and ladders" draggable={false} width={V_WIDTH} height={V_HEIGHT} className="absolute inset-0 pointer-events-none" />
       {game.monsters.filter(m => m.respawn <= 0).map(m => <div key={m.id} style={{ position: 'absolute', left: m.x, top: m.y, transform: entityTransform, transformOrigin: '0 0' }}>
         <button onClick={onAttack} title="Attack from your current position [X]" aria-label="Attack Orange Mushroom"
-          style={{ position: 'absolute', bottom: 0, left: -17, width: 34, height: 33, cursor: 'pointer' }}>
+          style={{ position: 'absolute', bottom: 0, left: -hitSize / 2, width: hitSize, height: hitSize, cursor: 'pointer' }}>
           <img src={mushroomSprite(m.action, m.elapsed)} alt="Orange Mushroom" draggable={false}
             style={{ position: 'absolute', bottom: 0, left: '50%', maxWidth: 'none', transform: `translateX(-50%) scale(${m.direction > 0 ? -0.5 : 0.5}, 0.5)`, transformOrigin: 'bottom center' }} />
         </button>
@@ -45,11 +43,13 @@ export function GameWorld({ game, onAttack, onPickup, toastMessage, tutorialVisi
       </div>)}
       {game.drops.map(d => {
         const item = MAPLE_DROPPABLE_ITEMS[d.reward];
-        return <button key={d.id} onClick={() => onPickup(d)} title={`Pick up ${item.name} [Z]`} aria-label={`Pick up ${item.name}`}
-          style={{ position: 'absolute', left: d.x - 8, top: d.y - 8, width: 16, height: 16, fontSize: 11, transform: entityTransform, transformOrigin: 'center' }}
-          className="cursor-pointer hover:scale-125">
-          <img src={`/items/${item.icon.endsWith('.png') ? item.icon : (ICONS[item.icon] ?? 'leaf.png')}`} alt="" className="w-full h-full object-contain" />
-        </button>;
+        return <div key={d.id} style={{ position: 'absolute', left: d.x, top: d.y, transform: entityTransform, transformOrigin: '0 0' }}>
+          <button onClick={() => onPickup(d)} title={`Pick up ${item.name} [Z]`} aria-label={`Pick up ${item.name}`}
+            style={{ position: 'absolute', left: -hitSize / 2, top: -hitSize / 2, width: hitSize, height: hitSize }}
+            className="game-target">
+            <img src={`/items/${item.icon}`} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+          </button>
+        </div>;
       })}
       {game.arrows.map(a => <div key={a.id} style={{ position: 'absolute', left: a.x, top: a.y, transform: `${entityTransform} scaleX(${a.vx > 0 ? 1 : -1})`, transformOrigin: '0 0', pointerEvents: 'none' }}>
         <div style={{ position: 'absolute', right: 0, top: -1, width: 17, height: 2, background: '#8c5a2b', borderBottom: '1px solid #4a2e12' }}>

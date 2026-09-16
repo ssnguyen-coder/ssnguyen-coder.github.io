@@ -27,7 +27,7 @@ export function useGame(paused: boolean, onAddItem: (item: MapleItem) => void, o
     const item = MAPLE_DROPPABLE_ITEMS[drop.reward];
     game.current.drops = game.current.drops.filter(d => d.id !== drop.id);
     callbacks.current.onAddItem(item); bgmPlayer.playItemPickup();
-    setToastMessage(`Obtained [${item.name}]! Press [I] to inspect`);
+    setToastMessage(`Collected ${item.name}. Open your bag to read its story.`);
     clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToastMessage(null), 3500);
   }, []);
   const pickupNearby = useCallback(() => {
@@ -35,19 +35,16 @@ export function useGame(paused: boolean, onAddItem: (item: MapleItem) => void, o
     const drop = game.current.drops.find(d => Math.abs(d.x - p.x) < 30 && Math.abs(d.y - p.y) < 35);
     if (drop) pickupItem(drop);
   }, [pickupItem]);
-  const handleDemoDrop = () => {
-    const g = game.current;
-    g.drops.push({ id: g.nextId++, reward: Math.floor(Math.random() * MAPLE_DROPPABLE_ITEMS.length),
-      x: g.player.x + 15, y: g.player.y - 15, vy: -2, floor: g.player.y - 8 });
-  };
   useEffect(() => { if (paused) keys.current = {}; }, [paused]);
   useEffect(() => {
     const clearKeys = () => { keys.current = {}; };
     const down = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLElement && (e.target.closest('input, textarea, select') || e.target.isContentEditable)) return;
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target instanceof HTMLElement && (e.target.closest('dialog, input, textarea, select') || e.target.isContentEditable)) return;
+      if (callbacks.current.paused) return;
+      if ((e.key === ' ' || e.key === 'Enter') && e.target instanceof HTMLElement && e.target.closest('button, a')) return;
       const k = e.key.toLowerCase();
       if (k === 'i') { e.preventDefault(); if (!e.repeat) { callbacks.current.onOpenInventory(); bgmPlayer.playInventoryToggle(); } return; }
-      if (callbacks.current.paused) return;
       if (['arrowleft', 'arrowright', 'arrowup', 'arrowdown', ' ', 'alt', 'control', 'a', 'd', 'w', 's', 'c', 'x', 'z'].includes(k)) e.preventDefault();
       keys.current[k] = true;
       if (e.repeat) return;
@@ -84,5 +81,5 @@ export function useGame(paused: boolean, onAddItem: (item: MapleItem) => void, o
       document.removeEventListener('visibilitychange', clearKeys);
     };
   }, [performAttack, performJump, pickupNearby]);
-  return { game: snapshot, toastMessage, tutorialVisible, performAttack, performJump, performJumpDown, pickupItem, pickupNearby, setVirtualKey, handleDemoDrop };
+  return { game: snapshot, toastMessage, tutorialVisible, performAttack, performJump, performJumpDown, pickupItem, pickupNearby, setVirtualKey };
 }

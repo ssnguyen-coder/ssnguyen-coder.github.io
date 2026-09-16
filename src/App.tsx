@@ -1,59 +1,36 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ResumeModal } from './components/ResumeModal';
+import { ProjectsModal } from './components/ProjectsModal';
 import { FloatingLeaves } from './components/FloatingLeaves';
 import { MapleGameStage } from './components/MapleGameStage';
 import { MapleInventoryModal } from './components/MapleInventoryModal';
-import { MapleItem, MAPLE_DROPPABLE_ITEMS } from './data/mapleItems';
+import type { MapleItem } from './data/mapleItems';
+
+type Modal = 'resume' | 'projects' | 'inventory' | null;
 
 export default function App() {
-  const [resumeModalOpen, setResumeModalOpen] = useState(false);
-  const [inventoryOpen, setInventoryOpen] = useState(false);
-
-  // Initial starter item in bag (UofT Diploma), more drop from attacking monsters!
-  const [inventory, setInventory] = useState<MapleItem[]>([
-    MAPLE_DROPPABLE_ITEMS[7], // University of Toronto B.S. Diploma
-    MAPLE_DROPPABLE_ITEMS[1], // Enchanted Cap of Spring Boot Microservices
-  ]);
-
-  const [selectedInventoryItem, setSelectedInventoryItem] = useState<MapleItem | null>(null);
+  const [activeModal, setActiveModal] = useState<Modal>(null);
+  const [inventory, setInventory] = useState<MapleItem[]>([]);
 
   const handleAddItem = (newItem: MapleItem) => {
-    setInventory((prev) => {
-      if (prev.some((item) => item.id === newItem.id)) {
-        return prev;
-      }
-      return [newItem, ...prev];
-    });
+    setInventory(previous => previous.some(item => item.id === newItem.id) ? previous : [...previous, newItem]);
   };
+  const closeModal = () => setActiveModal(null);
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-[#162132] text-stone-900 selection:bg-amber-300 selection:text-amber-950 font-sans relative select-none">
-      {/* Whimsical Falling Maple Leaves Ambience */}
+    <div className="portfolio-app">
       <FloatingLeaves />
-
-      {/* FULL-SCREEN MAPLESTORY MAP APP: Header at top of map, 2D interactive canvas in center, Footer HUD at bottom of map */}
       <MapleGameStage
-        onOpenInventory={() => setInventoryOpen(open => !open)}
-        onOpenResume={() => setResumeModalOpen(true)}
+        onOpenInventory={() => setActiveModal('inventory')}
+        onOpenResume={() => setActiveModal('resume')}
+        onOpenProjects={() => setActiveModal('projects')}
         inventory={inventory}
         onAddItem={handleAddItem}
-        paused={inventoryOpen || resumeModalOpen}
+        paused={activeModal !== null}
       />
-
-      {/* Printable / Viewable Resume Modal (Exact real resume from PDF) */}
-      <ResumeModal
-        isOpen={resumeModalOpen}
-        onClose={() => setResumeModalOpen(false)}
-      />
-
-      {/* Classic MapleStory Item Inventory Window (Toggled via [I] or on-screen button) */}
-      <MapleInventoryModal
-        isOpen={inventoryOpen}
-        onClose={() => setInventoryOpen(false)}
-        inventory={inventory}
-        selectedItem={selectedInventoryItem}
-        onSelectItem={(item) => setSelectedInventoryItem(item)}
-      />
+      {activeModal === 'resume' && <ResumeModal isOpen onClose={closeModal} />}
+      {activeModal === 'projects' && <ProjectsModal isOpen onClose={closeModal} />}
+      {activeModal === 'inventory' && <MapleInventoryModal isOpen onClose={closeModal} inventory={inventory} />}
     </div>
   );
 }

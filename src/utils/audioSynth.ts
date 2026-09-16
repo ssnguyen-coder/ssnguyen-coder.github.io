@@ -99,31 +99,6 @@ class CozyBgmPlayer {
     }
   }
 
-  public playAttackSlash() {
-    try {
-      const ctx = this.getAudioContext();
-      if (!ctx) return;
-      const now = ctx.currentTime;
-
-      // Sword slash whoosh: white noise through moving bandpass + quick sine pitch drop
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.exponentialRampToValueAtTime(150, now + 0.12);
-
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.13);
-    } catch {
-      // Audio failure safe
-    }
-  }
-
   public playHitSound(critical = false) {
     try {
       const ctx = this.getAudioContext();
