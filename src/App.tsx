@@ -28,9 +28,9 @@ export default function App() {
         onAddItem={handleAddItem}
         paused={activeModal !== null}
       />
-      {activeModal === 'resume' && <ResumeModal isOpen onClose={closeModal} />}
-      {activeModal === 'projects' && <ProjectsModal isOpen onClose={closeModal} />}
-      {activeModal === 'inventory' && <MapleInventoryModal isOpen onClose={closeModal} inventory={inventory} />}
+      <ResumeModal isOpen={activeModal === 'resume'} onClose={closeModal} />
+      <ProjectsModal isOpen={activeModal === 'projects'} onClose={closeModal} />
+      <MapleInventoryModal isOpen={activeModal === 'inventory'} onClose={closeModal} inventory={inventory} />
     </div>
   );
 }

@@ -34,7 +34,7 @@ export function MapleModal({ isOpen, onClose, title, children, actions, classNam
     window.addEventListener('resize', updateBounds);
     window.visualViewport?.addEventListener('resize', updateBounds);
     updateBounds();
-    dialog.showModal();
+    if (!dialog.open) dialog.showModal();
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', updateBounds);

@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test src/game/engine.test.ts"
+    "test": "tsx --test src/game/engine.test.ts"
   },
   "dependencies": {
     "lucide-react": "^0.546.0",

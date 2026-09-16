@@ -122,9 +122,9 @@
   .maple-name { font-size: 13px; }
   .maple-location { font-size: 8px; letter-spacing: 1px; }
   .maple-menu { padding: 4px; gap: 4px; }
-  .maple-hud-button { min-height: 44px; min-width: 44px; padding: 5px 7px; font-size: 12px; }
+  .maple-hud-button { min-height: 38px; min-width: 44px; padding: 4px 7px; font-size: 12px; }
   .keyboard-hint, .maple-key-button kbd, .footer-inventory, .maple-control-hint { display: none; }
-  .maple-footer { max-width: calc(100% - max(16px, env(safe-area-inset-left) + env(safe-area-inset-right))); padding: 5px; bottom: max(8px, env(safe-area-inset-bottom)); }
+  .maple-footer { max-width: calc(100% - max(16px, env(safe-area-inset-left) + env(safe-area-inset-right))); padding: 3px; bottom: max(2px, env(safe-area-inset-bottom)); }
   .maple-controls { gap: 5px; }
 }
 @media (max-width: 600px) {
@@ -145,7 +145,7 @@
   .maple-menu .resume-nav-icon, .maple-menu .keyboard-hint { display: none; }
   .maple-menu .maple-hud-button:nth-child(2) > svg { display: none; }
   .maple-menu .maple-hud-button:nth-child(2) > span:last-child:not(:first-of-type) { padding-inline: 2px; font-size: 9px; }
-  .maple-footer { width: calc(100% - 16px); }
+  .maple-footer { width: calc(100% - 16px); bottom: max(2px, env(safe-area-inset-bottom)); }
   .maple-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .maple-key-button { gap: 3px; padding-inline: 3px; }
 }
