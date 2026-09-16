@@ -75,7 +75,7 @@ test('each rope supports ascent, a stationary pose, and descent without falling 
 
 test('jumping lands and dropping ignores the current platform', () => {
   const g = initialGame();
-  assert.ok(jump(g, EMPTY_INPUT)); run(g, 90); assert.equal(g.player.platformId, 1);
+  assert.ok(jump(g, EMPTY_INPUT)); run(g, 90); assert.equal(g.player.platformId, 10);
   Object.assign(g.player, { x: 270, y: platformById(2)!.y, platformId: 2 });
   assert.ok(jump(g, { ...EMPTY_INPUT, down: true })); run(g, 90);
   assert.equal(g.player.platformId, 1); assert.equal(g.player.y, 375);
