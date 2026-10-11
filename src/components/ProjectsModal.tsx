@@ -1,7 +1,14 @@
 import { MapleModal } from './MapleModal';
-import { ExternalLink, GraduationCap, ShieldCheck } from 'lucide-react';
+import { ExternalLink, GraduationCap, Server, ShieldCheck } from 'lucide-react';
 
 const projects = [
+  {
+    title: 'uncluster.dev',
+    category: 'Application management',
+    description: 'A unified workspace for discovering, organizing, and managing applications across servers, containers, and clusters. Bring your applications into one clear view and operate them from a single interface.',
+    url: 'https://uncluster.dev/',
+    Icon: Server,
+  },
   {
     title: 'aibattle.ai',
     category: 'Slopsquatting scanner',
